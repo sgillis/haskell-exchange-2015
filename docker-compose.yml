@@ -1,0 +1,13 @@
+pres:
+    image: amouat/revealjs
+    ports:
+        - "8000:8000"
+        - "35729:35729"
+    volumes:
+        - ./md:/revealjs/md
+        - ./index.html:/revealjs/index.html
+        - ./Gruntfile.js:/revealjs/Gruntfile.js
+        - ./custom.css:/revealjs/css/custom.css
+        - ./fullscreen-img.css:/revealjs/css/fullscreen-img.css
+        - ./fullscreen-img.js:/revealjs/lib/js/fullscreen-img.js
+        - ./images:/revealjs/images
