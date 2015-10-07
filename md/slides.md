@@ -48,7 +48,7 @@ RUN cabal install aeson
 
 ---
 
-<!-- .slide: fullscreen-img="images/aeson.gif" -->
+<!-- .slide: fullscreen-img="images/non-loop-aeson.gif" -->
 
 ---
 
@@ -133,7 +133,7 @@ But can we integrate with a Docker setup?
 
 ---
 
-<!-- .slide: fullscreen-img="images/autoformatting.gif" -->
+<!-- .slide: fullscreen-img="images/non-loop-autoformatting.gif" -->
 
 ---
 
