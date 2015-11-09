@@ -1,0 +1,108 @@
+Hi everyone,
+Today I'd like to talk about "Haskell development with Docker".
+
+Why did I decide I wanted to talk about this? There are two reasons:
+- I read this blogpost on FP complete about a survey they did in the Haskell community.
+  It was about what Haskell'ers think are the major flaws in the Haskell eco system.
+  Tooling for handling packages and builds came out as one of the biggest gripes people
+  have with Haskell.
+- Another reason is that I like fooling around with Docker and trying to make stuff work
+  with Docker that was never really intended to be run with Docker
+Since I was working on getting my own Haskell development environment up and running with
+Docker, this talk seemed like a good idea.
+
+Now like I said before, I like fooling around with Docker, so brace yourselves, because
+I'm going to put everthing inside Docker containers.
+
+*Is there anyone who doesn't know Docker?*
+
+As far as I can see, the current "best practices" for setting up a Haskell project is by
+installing it using `cabal sandbox`. I think Docker is better because it not only allows
+you to sandbox Haskell libraries, but the entire compiler and even system libraries you
+might depend on.
+Another use case is that you can build "base images", e.g. a Yesod image. This allows you
+to get up and running with a new Yesod project in seconds instead of minutes/hours.
+
+I'll show you a small example. You can see here a Dockerfile of just 4 lines that sets up
+a Haskell environment with the `aeson` package preloaded.
+
+You can see that when we build this image and run it, we have a working Haskell environemnt
+up and running in seconds, and you're ready to start playing in the REPL. Before we ran these
+commands we literally had nothing related to Haskell, so I think this is a nice way for
+new Haskellers to get started with Haskell quickly.
+When I sent my talk proposal, I was thinking of presenting some tooling I had set up for
+myself to make Haskell development in Docker easier. But by the time I started working on
+the actual presentation, disaster struck: Stack!
+
+*Who doesn't know what stack is?*
+
+So I asked myself the question: "What about stack?". Because stack is trying to solve the
+same issues, namely getting your Haskell environment easy and consistent to set up.
+
+Being an ITer with my shiny Docker hammer, I immediately asked myself the question: "Can I
+use this with Docker?". Yes I can! Stack actually has great Docker support built in. You
+just have to enable it in your global config file, and every time you run any `stack`
+command, it will fire up a Docker container, do it's business, and remove the Docker
+container again.
+
+Why do I like using Stack with Docker? Again, because it allows me to extend the default
+stack base image to create my own custom environment I can share with other developers.
+If you are dependent on system libraries/tools, it is way easier to upgrade your
+development team consistently. Since many continuous integration tools have Docker support,
+this makes it easier to integrate with them.
+
+So when I'm talking about development, there are some things that you would like to have.
+You would like to have: syntax highlighting, automatic formatting of the source code,
+easy REPL integration and auto-completion.
+
+Spacemacs is a preconfigured emacs that does a lot of these things right out of the box,
+and is pretty popular in the Haskell community, so I started using that. But since the
+default setup of Spacemacs requires a normal install of the Haskell environment, I asked
+myself the question: "Can I integrate this with a Docker setup?". For syntax highlighting,
+this doesn't matter, and works well out of the box. What about auto formatting?
+
+Jasper wrote a nice tool called stylish-haskell that does auto-formatting of Haskell code.
+I decided to put the binary inside a Docker image and wrote a small Emacs function that
+will run that image on the current buffer. Let me show you with a small demo.
+
+So you see that the originally poorly formatted code is now looking better. All this was
+done just by inputting the current buffer in the Docker container, and by replacing the
+current buffer by the output of the container. So I didn't need stylish-haskell installed
+on my machine.
+
+So the next problem I was working on was REPL integration. The `haskell-mode` plugin for
+Emacs has a nice builtin REPL, but by default it doesn't work with code running in Docker
+containers, so I hacked a bit in the `haskell-mode` plugin to make it work. Unfortunately
+I wasn't able to make a GIF of that demo, so I'm forced to do it live.
+
+You see I have the main file open for one of my hobby projects called "giphybot". It's a
+simple chat bot that responds users in images pulled from "giphy.com". I'm showing you
+here what docker containers are running, right now there's just one that is running this
+presentation. When I bring up the REPL, it will start a new container and load the current
+code. I can show you the log files of the Docker container that just got started, and
+you'll see that when I enter code in the REPL, the container receives it as input, and
+will return the output back to the REPL.
+
+The demo I just showed was a bit more than just a trivial example, because "giphyToken"
+was defined to be "publicToken" which is actually defined in another library I wrote that
+is just a Haskell wrapper for the "giphy.com" API. So how did this code get loaded in
+the Docker container? You just have to tell stack to mount the correct directories into
+the container by defining them in the global stack config, and then in the project stack
+config you tell stack that it should include those packages as well. So real easy!
+
+Since this is a work in progress, there are still a lot of things that are not yet working.
+I still get some wrong error messages, when I kill the REPL the Docker container does not
+get killed. By modifying `haskell-mode`, the REPL will now no longer work with a Haskell
+setup that is not setup with Docker. There's no auto-completion in the REPL yet. And I
+have not managed to get autocompletion in the source code working yet, but I think I
+should be able to wrap ghc-mod to get this working somehow. So if you're interested in this
+kind of setup, please come see me later on!
+
+A final point where I think Docker can bring something extra to the table is bringing
+your app to production. When I build my "giphybot" using stack, I get a binary in one of
+stack's directories. When I put this binary, together with two missing libraries, into
+a Docker image, a get a very lightweight Docker image of just less then 30MB that I can
+throw into production using all the Docker tooling the major cloud providers are providing
+these days.
+
+If you have any more questions, comments or suggestions, please feel free to do so now!

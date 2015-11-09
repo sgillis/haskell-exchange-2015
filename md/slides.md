@@ -85,7 +85,6 @@ Every `stack` invocation runs inside a Docker container
 * Extension of stack image for custom environments
 * Upgrade to new system tools/packages is easier
 * CI integration
-* Faster experimentation time
 
 ---
 
